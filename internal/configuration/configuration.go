@@ -4,6 +4,7 @@ package configuration
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 
@@ -50,21 +51,20 @@ func NewConfiguration() *Configuration {
 	c.ClientCAPool = x509.NewCertPool()
 	c.ClientCAPool.AppendCertsFromPEM(data)
 
-	certData, err := ioutil.ReadFile(c.ServerCertificatePath)
-	if err != nil {
-		panic(err)
-	}
 	keyData, err := ioutil.ReadFile(c.ServerCertificateKeyPath)
 	if err != nil {
 		panic(err)
 	}
-
-	x509Cert, key, err := tglib.ReadCertificate(certData, keyData, c.ServerCertificateKeyPass)
+	keyBlock, err := tglib.DecryptPrivateKeyPEM(keyData, c.ServerCertificateKeyPass)
 	if err != nil {
 		panic(err)
 	}
 
-	c.ServerCertificate, err = tglib.ToTLSCertificate(x509Cert, key)
+	certData, err := ioutil.ReadFile(c.ServerCertificatePath)
+	if err != nil {
+		panic(err)
+	}
+	c.ServerCertificate, err = tls.X509KeyPair(certData, pem.EncodeToMemory(keyBlock))
 	if err != nil {
 		panic(err)
 	}
