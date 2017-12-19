@@ -10,11 +10,9 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/aporeto-inc/addedeffect/discovery"
 	"github.com/aporeto-inc/addedeffect/logutils"
 	"github.com/aporeto-inc/apoctl/versions"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
-	"github.com/aporeto-inc/underwater/certification"
 	"go.uber.org/zap"
 )
 
@@ -79,44 +77,15 @@ func main() {
 	banner(versions.ProjectVersion, versions.ProjectSha)
 	time.Local = time.UTC
 
-	zap.L().Info("Discovering platform", zap.String("cid", cfg.CidURL))
-	pf, err := discovery.DiscoverPlatform(cfg.CidURL, cfg.CidCACertPool, false)
-	if err != nil {
-		zap.L().Fatal("Unable to discover platform", zap.Error(err))
-	}
-	zap.L().Debug("Platform discovered", pf.Fields()...)
-
-	rootCAPool, err := pf.RootCAPool()
-	if err != nil {
-		zap.L().Fatal("Unable to retrieve root CA pool", zap.Error(err))
-	}
-
-	systemCAPool, err := pf.SystemCAPool()
-	if err != nil {
-		zap.L().Fatal("Unable to retrieve system CA pool", zap.Error(err))
-	}
-
-	_, servicesCertKeyGenerator := certification.CreateServiceCertificates(
-		cfg.BackendName,
-		rootCAPool,
-		pf,
-		cfg.IssuingCertKeyPassword,
-		false,
-		true,
-		cfg.DNSAltNames,
-		cfg.IPAltNames,
-		cfg.PublicCertKeyPassword,
-	)
-
 	server := &http.Server{
 		Addr: cfg.ListenAddress,
 		TLSConfig: &tls.Config{
 			ClientAuth:               tls.RequireAndVerifyClientCert,
-			ClientCAs:                systemCAPool,
+			ClientCAs:                cfg.ClientCAPool,
 			MinVersion:               tls.VersionTLS12,
 			SessionTicketsDisabled:   true,
 			PreferServerCipherSuites: true,
-			GetCertificate:           servicesCertKeyGenerator,
+			Certificates:             []tls.Certificate{cfg.ServerCertificate},
 			CipherSuites: []uint16{
 				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,

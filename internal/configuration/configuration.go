@@ -2,22 +2,31 @@
 package configuration
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+
+	"github.com/aporeto-inc/tg/tglib"
+	"github.com/aporeto-inc/underwater/conf"
 
 	"github.com/aporeto-inc/addedeffect/lombric"
 	"github.com/aporeto-inc/mtlsproxy/internal/versions"
-	"github.com/aporeto-inc/underwater/conf"
 )
 
 // Configuration hold the service configuration.
 type Configuration struct {
-	Backend     string `mapstructure:"backend"          desc:"destination host"                                     default:"http://127.0.0.1"`
-	BackendName string `mapstructure:"backend-name"     desc:"name of the backend that will be used in certificate" default:"mtlsproxy"`
+	Backend                  string `mapstructure:"backend"         desc:"destination host"                                     default:"http://127.0.0.1"`
+	ClientCAPoolPath         string `mapstructure:"clients-ca"      desc:"Path the CAs used to verify client certificates"      required:"true"`
+	ListenAddress            string `mapstructure:"listen"          desc:"Listening address"                                    default:":443"`
+	ServerCertificateKeyPass string `mapstructure:"cert-key-pass"   desc:"Password for the server certificate key"              `
+	ServerCertificateKeyPath string `mapstructure:"cert-key"        desc:"Path to the server certificate key"                   required:"true"`
+	ServerCertificatePath    string `mapstructure:"cert"            desc:"Path to the server certificate"                       required:"true"`
 
-	conf.APIServerConf  `mapstructure:",squash"`
-	conf.CidConf        `mapstructure:",squash"`
-	conf.LoggingConf    `mapstructure:",squash"`
-	conf.TLSIssuingConf `mapstructure:",squash" override:"dns-alt-name=mtlsproxy"`
+	conf.LoggingConf `mapstructure:",squash"`
+
+	ClientCAPool      *x509.CertPool
+	ServerCertificate tls.Certificate
 }
 
 // Prefix returns the configuration prefix.
@@ -33,6 +42,32 @@ func NewConfiguration() *Configuration {
 
 	c := &Configuration{}
 	lombric.Initialize(c)
+
+	data, err := ioutil.ReadFile(c.ClientCAPoolPath)
+	if err != nil {
+		panic(err)
+	}
+	c.ClientCAPool = x509.NewCertPool()
+	c.ClientCAPool.AppendCertsFromPEM(data)
+
+	certData, err := ioutil.ReadFile(c.ServerCertificatePath)
+	if err != nil {
+		panic(err)
+	}
+	keyData, err := ioutil.ReadFile(c.ServerCertificateKeyPath)
+	if err != nil {
+		panic(err)
+	}
+
+	x509Cert, key, err := tglib.ReadCertificate(certData, keyData, c.ServerCertificateKeyPass)
+	if err != nil {
+		panic(err)
+	}
+
+	c.ServerCertificate, err = tglib.ToTLSCertificate(x509Cert, key)
+	if err != nil {
+		panic(err)
+	}
 
 	return c
 }
