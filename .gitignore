@@ -1,0 +1,9 @@
+.DS_Store
+mtlsproxy
+docker/app
+debug
+vendor
+internal/versions/versions.go
+mtlsproxy.sh
+glide.lock
+.godebug.json
