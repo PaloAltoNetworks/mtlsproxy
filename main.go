@@ -2,18 +2,37 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/aporeto-inc/addedeffect/discovery"
 	"github.com/aporeto-inc/addedeffect/logutils"
+	"github.com/aporeto-inc/apoctl/versions"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
 	"github.com/aporeto-inc/underwater/certification"
 	"go.uber.org/zap"
 )
+
+func banner(version, revision string) {
+	fmt.Printf(`
+             _   _
+   _ __ ___ | |_| |___ _ __  _ __ _____  ___   _
+  | '_ . _ \| __| / __| '_ \| '__/ _ \ \/ / | | |
+  | | | | | | |_| \__ \ |_) | | | (_) >  <| |_| |
+  |_| |_| |_|\__|_|___/ .__/|_|  \___/_/\_\\__, |
+                       |_|                  |___/
+
+  MTLS Proxy Service (public)
+  %s - %s
+_______________________________________________________________
+
+`, version, revision)
+}
 
 func makeHandleHTTP(dest string) func(w http.ResponseWriter, req *http.Request) {
 
@@ -56,6 +75,9 @@ func main() {
 
 	cfg := configuration.NewConfiguration()
 	logutils.Configure(cfg.LogLevel, cfg.LogFormat)
+
+	banner(versions.ProjectVersion, versions.ProjectSha)
+	time.Local = time.UTC
 
 	zap.L().Info("Discovering platform", zap.String("cid", cfg.CidURL))
 	pf, err := discovery.DiscoverPlatform(cfg.CidURL, cfg.CidCACertPool, false)
@@ -103,7 +125,7 @@ func main() {
 				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			},
 		},
-		Handler: http.HandlerFunc(makeHandleHTTP(cfg.ProxyDest)),
+		Handler: http.HandlerFunc(makeHandleHTTP(cfg.Backend)),
 	}
 
 	go func() {
@@ -111,6 +133,8 @@ func main() {
 			zap.L().Fatal("Unable to start proxy", zap.Error(err))
 		}
 	}()
+
+	zap.L().Info("MTLSProxy is fully ready", zap.String("listen", cfg.ListenAddress), zap.String("backend", cfg.Backend))
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

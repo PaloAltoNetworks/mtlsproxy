@@ -11,7 +11,7 @@ import (
 
 // Configuration hold the service configuration.
 type Configuration struct {
-	ProxyDest   string `mapstructure:"dest"             desc:"destination host"                                     default:"http://127.0.0.1"`
+	Backend     string `mapstructure:"backend"          desc:"destination host"                                     default:"http://127.0.0.1"`
 	BackendName string `mapstructure:"backend-name"     desc:"name of the backend that will be used in certificate" default:"mtlsproxy"`
 
 	conf.APIServerConf  `mapstructure:",squash"`
