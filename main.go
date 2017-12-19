@@ -75,7 +75,7 @@ func main() {
 	}
 
 	_, servicesCertKeyGenerator := certification.CreateServiceCertificates(
-		"mtlsproxy",
+		cfg.BackendName,
 		rootCAPool,
 		pf,
 		cfg.IssuingCertKeyPassword,
