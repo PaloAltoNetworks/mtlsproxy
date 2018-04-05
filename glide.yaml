@@ -1,9 +1,0 @@
-package: github.com/aporeto-inc/mtlsproxy
-description: ""
-import:
-
-  ## Aporeto
-- package: github.com/aporeto-inc/addedeffect
-  version: 4.x
-- package: github.com/aporeto-inc/underwater
-  version: 1.x

@@ -23,6 +23,7 @@ type Configuration struct {
 	ServerCertificateKeyPass string `mapstructure:"cert-key-pass"   desc:"Password for the server certificate key"              `
 	ServerCertificateKeyPath string `mapstructure:"cert-key"        desc:"Path to the server certificate key"                   required:"true"`
 	ServerCertificatePath    string `mapstructure:"cert"            desc:"Path to the server certificate"                       required:"true"`
+	Mode                     string `mapstructure:"mode"            desc:"Proxy mode"                                           default:"http" allowed:"tcp,http"`
 
 	conf.LoggingConf `mapstructure:",squash"`
 
