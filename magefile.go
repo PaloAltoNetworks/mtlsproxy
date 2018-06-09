@@ -4,8 +4,8 @@
 package main
 
 import (
-	"github.com/aporeto-inc/addedeffect/magetask"
 	"github.com/magefile/mage/mg"
+	"go.aporeto.io/addedeffect/magetask"
 )
 
 // Version writes the versions file.

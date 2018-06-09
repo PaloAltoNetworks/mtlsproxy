@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/aporeto-inc/tg/tglib"
-	"github.com/aporeto-inc/underwater/conf"
-
-	"github.com/aporeto-inc/addedeffect/lombric"
 	"github.com/aporeto-inc/mtlsproxy/internal/versions"
+
+	"go.aporeto.io/addedeffect/lombric"
+	"go.aporeto.io/tg/tglib"
+	"go.aporeto.io/underwater/conf"
 )
 
 // Configuration hold the service configuration.

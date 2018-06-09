@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aporeto-inc/addedeffect/logutils"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
 	"github.com/aporeto-inc/mtlsproxy/internal/versions"
+
+	"go.aporeto.io/addedeffect/logutils"
 )
 
 func banner(version, revision string) {
