@@ -9,10 +9,8 @@ import (
 	"io/ioutil"
 
 	"github.com/aporeto-inc/mtlsproxy/internal/versions"
-
 	"go.aporeto.io/addedeffect/lombric"
 	"go.aporeto.io/tg/tglib"
-	"go.aporeto.io/underwater/conf"
 )
 
 // Configuration hold the service configuration.
@@ -24,8 +22,8 @@ type Configuration struct {
 	ServerCertificateKeyPath string `mapstructure:"cert-key"        desc:"Path to the server certificate key"                   required:"true"`
 	ServerCertificatePath    string `mapstructure:"cert"            desc:"Path to the server certificate"                       required:"true"`
 	Mode                     string `mapstructure:"mode"            desc:"Proxy mode"                                           default:"http" allowed:"tcp,http"`
-
-	conf.LoggingConf `mapstructure:",squash"`
+	LogFormat                string `mapstructure:"log-format"                      desc:"Log format"                                                           default:"json"`
+	LogLevel                 string `mapstructure:"log-level"                       desc:"Log level"                                                            default:"info"`
 
 	ClientCAPool      *x509.CertPool
 	ServerCertificate tls.Certificate

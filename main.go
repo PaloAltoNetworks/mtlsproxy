@@ -7,7 +7,6 @@ import (
 
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
 	"github.com/aporeto-inc/mtlsproxy/internal/versions"
-
 	"go.aporeto.io/addedeffect/logutils"
 )
 
