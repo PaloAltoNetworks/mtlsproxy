@@ -4,11 +4,9 @@ package configuration
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 
-	"github.com/aporeto-inc/mtlsproxy/internal/versions"
 	"go.aporeto.io/addedeffect/lombric"
 	"go.aporeto.io/tg/tglib"
 )
@@ -22,8 +20,8 @@ type Configuration struct {
 	ServerCertificateKeyPath string `mapstructure:"cert-key"        desc:"Path to the server certificate key"                   required:"true"`
 	ServerCertificatePath    string `mapstructure:"cert"            desc:"Path to the server certificate"                       required:"true"`
 	Mode                     string `mapstructure:"mode"            desc:"Proxy mode"                                           default:"http" allowed:"tcp,http"`
-	LogFormat                string `mapstructure:"log-format"                      desc:"Log format"                                                           default:"json"`
-	LogLevel                 string `mapstructure:"log-level"                       desc:"Log level"                                                            default:"info"`
+	LogFormat                string `mapstructure:"log-format"      desc:"Log format"                                           default:"console"`
+	LogLevel                 string `mapstructure:"log-level"       desc:"Log level"                                            default:"info"`
 
 	ClientCAPool      *x509.CertPool
 	ServerCertificate tls.Certificate
@@ -34,7 +32,7 @@ func (c *Configuration) Prefix() string { return "mtlsproxy" }
 
 // PrintVersion prints the current version.
 func (c *Configuration) PrintVersion() {
-	fmt.Printf("mtls - %s (%s)\n", versions.ProjectVersion, versions.ProjectSha)
+	fmt.Printf("mtls - %s (%s)\n", "1.0", "")
 }
 
 // NewConfiguration returns a new configuration.
@@ -50,20 +48,12 @@ func NewConfiguration() *Configuration {
 	c.ClientCAPool = x509.NewCertPool()
 	c.ClientCAPool.AppendCertsFromPEM(data)
 
-	keyData, err := ioutil.ReadFile(c.ServerCertificateKeyPath)
-	if err != nil {
-		panic(err)
-	}
-	keyBlock, err := tglib.DecryptPrivateKeyPEM(keyData, c.ServerCertificateKeyPass)
+	cert, key, err := tglib.ReadCertificatePEM(c.ServerCertificatePath, c.ServerCertificateKeyPath, c.ServerCertificateKeyPass)
 	if err != nil {
 		panic(err)
 	}
 
-	certData, err := ioutil.ReadFile(c.ServerCertificatePath)
-	if err != nil {
-		panic(err)
-	}
-	c.ServerCertificate, err = tls.X509KeyPair(certData, pem.EncodeToMemory(keyBlock))
+	c.ServerCertificate, err = tglib.ToTLSCertificate(cert, key)
 	if err != nil {
 		panic(err)
 	}

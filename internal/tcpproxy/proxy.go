@@ -1,4 +1,4 @@
-package main
+package tcpproxy
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
-	"go.uber.org/zap"
-
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
 )
 
@@ -86,7 +84,8 @@ func (p *proxy) copy(ctx context.Context, from, to net.Conn, wg *sync.WaitGroup)
 	}
 }
 
-func startTCPProxy(cfg *configuration.Configuration, tlsConfig *tls.Config) {
+// Start starts the proxy
+func Start(cfg *configuration.Configuration, tlsConfig *tls.Config) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -97,11 +96,11 @@ func startTCPProxy(cfg *configuration.Configuration, tlsConfig *tls.Config) {
 		}
 	}()
 
-	zap.L().Info("MTLSProxy is ready",
-		zap.String("mode", cfg.Mode),
-		zap.String("listen", cfg.ListenAddress),
-		zap.String("backend", cfg.Backend),
-	)
+	logrus.
+		WithField("mode", cfg.Mode).
+		WithField("listen", cfg.ListenAddress).
+		WithField("backend", cfg.Backend).
+		Info("MTLSProxy is ready")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

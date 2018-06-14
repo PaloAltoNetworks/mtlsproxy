@@ -1,4 +1,4 @@
-package main
+package httpproxy
 
 import (
 	"crypto/tls"
@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
-	"go.uber.org/zap"
 )
 
 func makeHandleHTTP(dest string) func(w http.ResponseWriter, req *http.Request) {
@@ -49,7 +49,8 @@ func makeHandleHTTP(dest string) func(w http.ResponseWriter, req *http.Request) 
 	}
 }
 
-func startHTTPProxy(cfg *configuration.Configuration, tlsConfig *tls.Config) {
+// Start starts the proxy
+func Start(cfg *configuration.Configuration, tlsConfig *tls.Config) {
 
 	server := &http.Server{
 		Addr:      cfg.ListenAddress,
@@ -59,15 +60,15 @@ func startHTTPProxy(cfg *configuration.Configuration, tlsConfig *tls.Config) {
 
 	go func() {
 		if err := server.ListenAndServeTLS("", ""); err != nil {
-			zap.L().Fatal("Unable to start proxy", zap.Error(err))
+			logrus.WithError(err).Fatal("Unable to start proxy")
 		}
 	}()
 
-	zap.L().Info("MTLSProxy is ready",
-		zap.String("mode", cfg.Mode),
-		zap.String("listen", cfg.ListenAddress),
-		zap.String("backend", cfg.Backend),
-	)
+	logrus.
+		WithField("mode", cfg.Mode).
+		WithField("listen", cfg.ListenAddress).
+		WithField("backend", cfg.Backend).
+		Info("MTLSProxy is ready")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

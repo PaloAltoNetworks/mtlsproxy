@@ -2,36 +2,17 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"time"
 
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
-	"github.com/aporeto-inc/mtlsproxy/internal/versions"
-	"go.aporeto.io/addedeffect/logutils"
+	"github.com/aporeto-inc/mtlsproxy/internal/httpproxy"
+	"github.com/aporeto-inc/mtlsproxy/internal/tcpproxy"
 )
-
-func banner(version, revision string) {
-	fmt.Printf(`
-             _   _
-   _ __ ___ | |_| |___ _ __  _ __ _____  ___   _
-  | '_ . _ \| __| / __| '_ \| '__/ _ \ \/ / | | |
-  | | | | | | |_| \__ \ |_) | | | (_) >  <| |_| |
-  |_| |_| |_|\__|_|___/ .__/|_|  \___/_/\_\\__, |
-                       |_|                  |___/
-
-  MTLS Proxy Service (public)
-  %s - %s
-_______________________________________________________________
-
-`, version, revision)
-}
 
 func main() {
 
 	cfg := configuration.NewConfiguration()
-	logutils.Configure(cfg.LogLevel, cfg.LogFormat)
 
-	banner(versions.ProjectVersion, versions.ProjectSha)
 	time.Local = time.UTC
 
 	tlsConfig := &tls.Config{
@@ -52,8 +33,8 @@ func main() {
 
 	switch cfg.Mode {
 	case "http":
-		startHTTPProxy(cfg, tlsConfig)
+		httpproxy.Start(cfg, tlsConfig)
 	case "tcp":
-		startTCPProxy(cfg, tlsConfig)
+		tcpproxy.Start(cfg, tlsConfig)
 	}
 }
