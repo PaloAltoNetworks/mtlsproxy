@@ -3,11 +3,9 @@ package tcpproxy
 import (
 	"context"
 	"crypto/tls"
-	"io"
 	"net"
 	"os"
 	"os/signal"
-	"sync"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
@@ -34,6 +32,7 @@ func (p *proxy) start(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	defer listener.Close() // nolint
 
 	for {
 		select {
@@ -58,25 +57,35 @@ func (p *proxy) handle(ctx context.Context, connection net.Conn) {
 	}
 	defer remote.Close() // nolint
 
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
+	subctx, cancel := context.WithCancel(ctx)
+	go p.copy(subctx, cancel, remote, connection)
+	go p.copy(subctx, cancel, connection, remote)
 
-	go p.copy(ctx, remote, connection, wg)
-	go p.copy(ctx, connection, remote, wg)
-
-	wg.Wait()
+	<-subctx.Done()
 }
 
-func (p *proxy) copy(ctx context.Context, from, to net.Conn, wg *sync.WaitGroup) {
+func (p *proxy) copy(ctx context.Context, cancel context.CancelFunc, from, to net.Conn) {
 
-	defer wg.Done()
+	defer cancel()
+
+	var n int
+	var err error
+	buffer := make([]byte, 1024)
 
 	select {
 
 	default:
-		if _, err := io.Copy(to, from); err != nil {
-			logrus.WithError(err).Error("Error during data copy")
-			return
+
+		for {
+			n, err = to.Read(buffer)
+			if err != nil {
+				return
+			}
+
+			_, err = from.Write(buffer[:n])
+			if err != nil {
+				return
+			}
 		}
 
 	case <-ctx.Done():
