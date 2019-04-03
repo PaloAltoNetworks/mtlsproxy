@@ -17,4 +17,4 @@ package: build_linux
 	mv ./mtlsproxy ./docker/app
 
 container: package
-	cd docker && docker build -t gcr.io/aporetodev/mtlsproxy:1.0.0 .
+	cd docker && docker build -t gcr.io/aporetodev/mtlsproxy:1.1.0 .
