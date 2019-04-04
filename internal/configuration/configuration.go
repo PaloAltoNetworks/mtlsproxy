@@ -23,8 +23,8 @@ type Configuration struct {
 	LogFormat                string `mapstructure:"log-format"      desc:"Log format"                                           default:"console"`
 	LogLevel                 string `mapstructure:"log-level"       desc:"Log level"                                            default:"info"`
 
-	ClientCAPool      *x509.CertPool
-	ServerCertificate tls.Certificate
+	ClientCAPool       *x509.CertPool
+	ServerCertificates []tls.Certificate
 }
 
 // Prefix returns the configuration prefix.
@@ -48,15 +48,16 @@ func NewConfiguration() *Configuration {
 	c.ClientCAPool = x509.NewCertPool()
 	c.ClientCAPool.AppendCertsFromPEM(data)
 
-	cert, key, err := tglib.ReadCertificatePEM(c.ServerCertificatePath, c.ServerCertificateKeyPath, c.ServerCertificateKeyPass)
+	certs, key, err := tglib.ReadCertificatePEMs(c.ServerCertificatePath, c.ServerCertificateKeyPath, c.ServerCertificateKeyPass)
 	if err != nil {
 		panic(err)
 	}
 
-	c.ServerCertificate, err = tglib.ToTLSCertificate(cert, key)
+	tc, err := tglib.ToTLSCertificates(certs, key)
 	if err != nil {
 		panic(err)
 	}
+	c.ServerCertificates = append(c.ServerCertificates, tc)
 
 	return c
 }
