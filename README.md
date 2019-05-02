@@ -1,9 +1,6 @@
 # mtlsproxy
 
-MTLS proxy is a simple proxy service that can be run as a sidecar of an unsecure service.
-It will allow Aporeto system cert issued bearer to connect to the backend service.
-
-This is moslty use for securing jaeger right now.
+MTLS proxy is a simple proxy service that can be run as a sidecar of an unsecure service and provide mutual TLS authentication.
 
 ## example
 
