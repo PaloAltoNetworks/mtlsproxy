@@ -1,6 +1,6 @@
 # mtlsproxy
 
-MTLS proxy is a simple proxy service that can be run as a sidecar of an unsecure service and provide mutual TLS authentication.
+MTLS proxy is a simple proxy service that runs as a sidecar of an unsecure service to provide mutual TLS authentication.
 
 ## example
 
