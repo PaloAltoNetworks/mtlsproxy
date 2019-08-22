@@ -14,12 +14,12 @@ package httpproxy
 import (
 	"crypto/tls"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/aporeto-inc/mtlsproxy/internal/configuration"
 )
 
@@ -71,15 +71,11 @@ func Start(cfg *configuration.Configuration, tlsConfig *tls.Config) {
 
 	go func() {
 		if err := server.ListenAndServeTLS("", ""); err != nil {
-			logrus.WithError(err).Fatal("Unable to start proxy")
+			log.Fatalln("Unable to start proxy:", err)
 		}
 	}()
 
-	logrus.
-		WithField("mode", cfg.Mode).
-		WithField("listen", cfg.ListenAddress).
-		WithField("backend", cfg.Backend).
-		Info("MTLSProxy is ready")
+	log.Printf("MTLSProxy is ready. mode:%s listen:%s backend:%s ", cfg.Mode, cfg.ListenAddress, cfg.Backend)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
