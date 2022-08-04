@@ -4,5 +4,5 @@ go 1.12
 
 require (
 	go.aporeto.io/addedeffect v1.61.1
-	go.aporeto.io/tg v1.25.0
+	go.aporeto.io/tg v1.34.1-0.20220729210705-bd69690c4535
 )
