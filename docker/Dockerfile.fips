@@ -1,0 +1,19 @@
+FROM golang:latest as golang
+ADD fips/ /go/src
+RUN cd /go/src/ && GOEXPERIMENT=boringcrypto CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+LABEL \
+    contact=info@aporeto.com \
+    vendor=aporeto \
+    application=aporeto \
+    component=mtlsproxy \
+    fipsEnabled=true \
+    visibility=public
+
+COPY --from=golang /go/src/mtlsproxy /mtlsproxy
+
+EXPOSE 443
+
+ENTRYPOINT ["/mtlsproxy"]
