@@ -1,6 +1,6 @@
 PROJECT_NAME := mtlsproxy
 
-MTLSPROXY_VERSION := 1.1.0
+MTLSPROXY_VERSION := 1.2.0
 PROJECT_VERSION ?= $(MTLSPROXY_VERSION)-1.0.0
 
 DOCKER_REGISTRY ?= gcr.io/aporetodev
@@ -27,7 +27,7 @@ package_fips:
 	cp -rf main.go internal go.mod go.sum ./docker/fips
 
 container_fips: package_fips
-	cd docker && docker build -f Dockerfile.fips -t $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) .
+	cd docker && docker build --pull -f Dockerfile.fips -t $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) .
 
 container: package
 	cd docker && docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
