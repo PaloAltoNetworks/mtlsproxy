@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/agl/extract-nss-root-certs v0.0.0-20140429191007-492d8c95628e // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
