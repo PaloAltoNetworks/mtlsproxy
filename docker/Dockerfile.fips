@@ -1,7 +1,34 @@
-FROM golang:latest as golang
+#######################################################################
+# Go tools
+#
+# https://go.dev/dl/
+#######################################################################
+
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest as go-tools
+
+ENV GOLANG_VERSION=1.21.0
+ENV GOLANG_PLATFORM=linux-amd64
+
+RUN microdnf update \
+  && microdnf install -y --nodocs \
+    tar \
+    gzip \
+    gcc \
+  && microdnf clean all \
+  && rm -rf /var/cache/yum
+
+RUN rm -rf /usr/local/go \
+  && curl -fsSL https://go.dev/dl/go${GOLANG_VERSION}.${GOLANG_PLATFORM}.tar.gz | tar xz -C /usr/local
+
+ENV PATH="${PATH}:/usr/local/go/bin"
+
+# build
 ADD fips/ /go/src
 RUN cd /go/src/ && GOEXPERIMENT=boringcrypto CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build
 
+#######################################################################
+# FIPS image
+#######################################################################
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 LABEL \
@@ -12,7 +39,7 @@ LABEL \
     fipsEnabled=true \
     visibility=public
 
-COPY --from=golang /go/src/mtlsproxy /mtlsproxy
+COPY --from=go-tools /go/src/mtlsproxy /mtlsproxy
 
 EXPOSE 443
 
