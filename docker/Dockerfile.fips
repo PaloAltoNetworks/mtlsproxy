@@ -6,7 +6,7 @@
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest as go-tools
 
-ENV GOLANG_VERSION=1.21.0
+ENV GOLANG_VERSION=1.21.3
 ENV GOLANG_PLATFORM=linux-amd64
 
 RUN microdnf update \
