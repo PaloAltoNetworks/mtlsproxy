@@ -1,6 +1,6 @@
 module github.com/aporeto-inc/mtlsproxy
 
-go 1.20
+go 1.21
 
 require (
 	go.aporeto.io/addedeffect v1.82.0
