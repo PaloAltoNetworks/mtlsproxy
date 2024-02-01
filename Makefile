@@ -42,10 +42,12 @@ container_fips: versions package_fips
 container: versions package
 	cd docker && docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
 
-$(DOCKER_REGISTRY):
-	@docker tag $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) $@/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
-  && docker push $@/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
-  && docker tag $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) $@/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) \
-  && docker push $@/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG)
+push: container
+	docker tag $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) \
+  	&& docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG)
 
-push: container container_fips $(DOCKER_REGISTRY)
+push-fips: container_fips
+  	docker tag $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) \
+  	&& docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG)
+
+push: push push-fips
