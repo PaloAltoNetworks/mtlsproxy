@@ -25,7 +25,7 @@ build_linux:
 
 package: build_linux
 	mkdir -p ./docker/app
-	go get -u github.com/agl/extract-nss-root-certs
+	go install github.com/agl/extract-nss-root-certs@latest
 	curl -s https://hg.mozilla.org/mozilla-central/raw-file/tip/security/nss/lib/ckfw/builtins/certdata.txt -o certdata.txt
 	extract-nss-root-certs > docker/app/ca-certificates.pem
 	rm -f certdata.txt
