@@ -7,6 +7,16 @@ DOCKER_REGISTRY ?= gcr.io/aporetodev
 DOCKER_IMAGE_NAME?=$(PROJECT_NAME)
 DOCKER_IMAGE_TAG?=$(PROJECT_VERSION)
 
+define VERSIONS_FILE
+	export DOCKER_REGISTRY="$(DOCKER_REGISTRY)"
+	export DOCKER_IMAGE_NAME="$(DOCKER_IMAGE_NAME)"
+	export DOCKER_IMAGE_TAG="$(DOCKER_IMAGE_TAG)"
+endef
+export VERSIONS_FILE
+
+versions:
+	echo "$$VERSIONS_FILE" > versions
+
 build:
 	go build
 
@@ -26,10 +36,10 @@ package_fips:
 	mkdir -p ./docker/fips
 	cp -rf main.go internal go.mod go.sum ./docker/fips
 
-container_fips: package_fips
+container_fips: versions package_fips
 	cd docker && docker build --pull -f Dockerfile.fips -t $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) .
 
-container: package
+container: versions package
 	cd docker && docker build -t $(DOCKER_IMAGE_NAME):$(DOCKER_IMAGE_TAG) .
 
 $(DOCKER_REGISTRY):
