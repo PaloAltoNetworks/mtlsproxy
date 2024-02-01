@@ -50,4 +50,4 @@ push-fips: container_fips
 	docker tag $(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG) \
   	&& docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)-fips:$(DOCKER_IMAGE_TAG)
 
-push: push push-fips
+push-all: push push-fips
