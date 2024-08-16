@@ -29,18 +29,10 @@ func main() {
 	tlsConfig := &tls.Config{
 		ClientAuth:               tls.RequireAndVerifyClientCert,
 		ClientCAs:                cfg.ClientCAPool,
-		MinVersion:               tls.VersionTLS12,
+		MinVersion:               tls.VersionTLS13,
 		SessionTicketsDisabled:   true,
 		PreferServerCipherSuites: true,
 		Certificates:             cfg.ServerCertificates,
-
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
-			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
 	}
 
 	switch cfg.Mode {
